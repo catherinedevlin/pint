@@ -10,7 +10,7 @@ import operator as op
 from pint.unit import (ScaleConverter, OffsetConverter, UnitsContainer,
                        Definition, PrefixDefinition, UnitDefinition,
                        DimensionDefinition, _freeze, Converter, UnitRegistry,
-                       LazyRegistry, ParserHelper)
+                       LazyRegistry, ParserHelper, to_common)
 from pint import DimensionalityError, UndefinedUnitError
 from pint.compat import u, unittest, np
 from pint.testsuite import QuantityTestCase, helpers, BaseTestCase
@@ -558,6 +558,17 @@ class TestCompatibleUnits(QuantityTestCase):
         self.assertEqual(ureg.get_compatible_units('meter'), ureg.get_compatible_units(ParserHelper(meter=1)))
 
 
+class TestCompatibleUnits(QuantityTestCase):
+   
+    def test_to_common(self):
+        ureg = UnitRegistry()
+        data = [ ureg.parse_expression(q) for q in
+                '3 cm', '2.4 in', '9.1 cm', '0.04 ft']
+        result = to_common(data)
+        self.assertEqual(result, [ ureg.parse_expression(q) for q in 
+                '3 cm', '6.096 cm', '9.1 cm', '1.2192 cm'])
+
+
 class TestRegistryWithDefaultRegistry(TestRegistry):
 
     @classmethod
@@ -598,3 +609,5 @@ class TestErrors(BaseTestCase):
         msg = "Cannot convert from 'a' (c) to 'b' (d)msg"
         ex = DimensionalityError('a', 'b', 'c', 'd', 'msg')
         self.assertEqual(str(ex), msg)
+
+
